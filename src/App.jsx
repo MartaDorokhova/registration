@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './App.css';
+import styles from './App.module.css';
 
 const sendFormData = (formData) => {
 	console.log(formData);
@@ -10,46 +10,116 @@ export const App = () => {
 		password: '',
 		repeatPassword: '',
 	});
-
+	const [formDataError, setFormDataError] = useState({
+		emailError: null,
+		passwordError: null,
+		repeatPasswordError: null,
+	});
 	const onSubmit = (event) => {
 		event.preventDefault();
+		let emailError = null;
+		let passwordError = null;
+		let repeatPasswordError = null;
+		if (!formData.email) {
+			emailError = 'Поле обязательно для заполнения';
+		}
+		if (!formData.password) {
+			passwordError = 'Поле обязательно для заполнения';
+		}
+		if (!formData.repeatPassword) {
+			repeatPasswordError = 'Поле обязательно для заполнения';
+		}
+		setFormDataError({
+			...formDataError,
+			passwordError,
+			emailError,
+			repeatPasswordError,
+		});
 		sendFormData({ formData });
 	};
 	const { email, password, repeatPassword } = formData;
+
+	const handlePasswordChange = ({ target }) => {
+		setFormData({ ...formData, password: target.value });
+
+		let newError = null;
+
+		if (
+			!/(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z!@#$%^&*]{6,}/g.test(
+				target.value,
+			)
+		) {
+			newError =
+				' Пароль должен содержать символы, буквы и цифры разного регистра. Минимум одна из букв должна быть заглавной. Длина пароля  не менее 6 символов';
+		}
+
+		setFormDataError({ ...formDataError, passwordError: newError });
+	};
+	const handleEmailChange = ({ target }) => {
+		setFormData({ ...formData, email: target.value });
+		console.log(formData.email);
+		let newError = null;
+
+		if (!/\S+@\S+\.\S+/.test(target.value)) {
+			newError = 'Неверный почтовый адрес';
+		}
+
+		setFormDataError({ ...formDataError, emailError: newError });
+	};
+	const handleRepeatPasswordChange = ({ target }) => {
+		setFormData({ ...formData, repeatPassword: target.value });
+		let newError = null;
+		console.log(password, target.value);
+		if (password !== target.value) {
+			newError = ' Пароли должны совпадать';
+		}
+
+		setFormDataError({ ...formDataError, repeatPasswordError: newError });
+	};
+
 	return (
-		<div className="styles.app">
-			<form onSubmit={onSubmit}>
-				<div>Имя</div>
+		<div className={styles.App}>
+			<form onSubmit={onSubmit} className={styles.Form}>
+				<div>Почта</div>
 				<input
 					name="email"
 					type="email"
 					placeholder="Введите email"
 					value={email}
-					onChange={({ target }) =>
-						setFormData({ ...formData, email: target.value })
-					}
+					onChange={handleEmailChange}
+					className="styles.input"
 				/>
+				{formDataError.emailError && <p>{formDataError.emailError}</p>}
 				<div>Пароль</div>
 				<input
 					name="password"
 					type="password"
 					placeholder="Введите пароль"
 					value={password}
-					onChange={({ target }) =>
-						setFormData({ ...formData, password: target.value })
-					}
+					onChange={handlePasswordChange}
 				/>
+				{formDataError.passwordError && <p>{formDataError.passwordError}</p>}
 				<div>Повторите пароль</div>
 				<input
 					name="repeatPassword"
 					type="password"
 					placeholder="Повторите пароль"
 					value={repeatPassword}
-					onChange={({ target }) =>
-						setFormData({ ...formData, repeatPassword: target.value })
-					}
+					onChange={handleRepeatPasswordChange}
 				/>
-				<button type="submit">Зарегистрироваться</button>
+				{formDataError.repeatPasswordError && (
+					<p>{formDataError.repeatPasswordError}</p>
+				)}
+				<button
+					type="submit"
+					disabled={
+						!!formDataError.passwordError ||
+						!!formDataError.repeatPasswordError ||
+						!!formDataError.emailError
+					}
+				>
+					Зарегистрироваться
+				</button>
 			</form>
 		</div>
 	);
