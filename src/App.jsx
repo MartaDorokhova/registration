@@ -14,6 +14,7 @@ export const App = () => {
 		emailError: null,
 		passwordError: null,
 		repeatPasswordError: null,
+		registrarionError: null,
 	});
 	const onSubmit = (event) => {
 		event.preventDefault();
@@ -29,6 +30,7 @@ export const App = () => {
 		if (!formData.repeatPassword) {
 			repeatPasswordError = 'Поле обязательно для заполнения';
 		}
+
 		setFormDataError({
 			...formDataError,
 			passwordError,
@@ -38,6 +40,17 @@ export const App = () => {
 		sendFormData({ formData });
 	};
 	const { email, password, repeatPassword } = formData;
+
+	const handleEmailChange = ({ target }) => {
+		setFormData({ ...formData, email: target.value });
+		let newError = null;
+
+		if (!/\S+@\S+\.\S+/.test(target.value)) {
+			newError = 'Неверный почтовый адрес';
+		}
+
+		setFormDataError({ ...formDataError, emailError: newError });
+	};
 
 	const handlePasswordChange = ({ target }) => {
 		setFormData({ ...formData, password: target.value });
@@ -52,29 +65,24 @@ export const App = () => {
 			newError =
 				' Пароль должен содержать символы, буквы и цифры разного регистра. Минимум одна из букв должна быть заглавной. Длина пароля  не менее 6 символов';
 		}
+		if (repeatPassword && repeatPassword !== target.value) {
+			newError = ' Пароли должны совпадать';
+		}
 
 		setFormDataError({ ...formDataError, passwordError: newError });
 	};
-	const handleEmailChange = ({ target }) => {
-		setFormData({ ...formData, email: target.value });
-		console.log(formData.email);
-		let newError = null;
 
-		if (!/\S+@\S+\.\S+/.test(target.value)) {
-			newError = 'Неверный почтовый адрес';
-		}
-
-		setFormDataError({ ...formDataError, emailError: newError });
-	};
 	const handleRepeatPasswordChange = ({ target }) => {
 		setFormData({ ...formData, repeatPassword: target.value });
 		let newError = null;
-		console.log(password, target.value);
 		if (password !== target.value) {
 			newError = ' Пароли должны совпадать';
 		}
 
-		setFormDataError({ ...formDataError, repeatPasswordError: newError });
+		setFormDataError({
+			...formDataError,
+			repeatPasswordError: newError,
+		});
 	};
 
 	return (
